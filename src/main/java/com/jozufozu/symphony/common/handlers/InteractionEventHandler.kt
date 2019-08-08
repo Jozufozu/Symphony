@@ -1,19 +1,19 @@
-package com.jozufozu.quench.common.handlers
+package com.jozufozu.symphony.common.handlers
 
-import com.jozufozu.quench.api.SymphonyAPI
-import com.jozufozu.quench.api.interactions.AttackInteraction
-import com.jozufozu.quench.common.EnchantmentNoteType
-import net.minecraft.entity.EntityLivingBase
-import net.minecraft.potion.PotionEffect
+import com.jozufozu.symphony.api.SymphonyAPI
+import com.jozufozu.symphony.api.interactions.AttackInteraction
+import com.jozufozu.symphony.common.attunements.EnchantmentNoteType
+import net.minecraft.entity.LivingEntity
+import net.minecraft.potion.EffectInstance
 import net.minecraft.util.EntityDamageSource
 import net.minecraftforge.event.entity.living.LivingDamageEvent
 import net.minecraftforge.event.entity.player.ItemTooltipEvent
+import net.minecraftforge.eventbus.api.SubscribeEvent
 import net.minecraftforge.fml.common.Mod
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import kotlin.math.max
 
 @Mod.EventBusSubscriber
-object QuenchEventHandler {
+object InteractionEventHandler {
 
     @SubscribeEvent
     @JvmStatic fun alterTooltip(event: ItemTooltipEvent) {
@@ -21,12 +21,13 @@ object QuenchEventHandler {
 
         for (attunement in attunements) {
             if (attunement is EnchantmentNoteType.AttunementEnchantment) {
-                event.toolTip.remove(attunement.getEnchantment().getTranslatedName(attunement.level))
+                event.toolTip.remove(attunement.getEnchantment().getDisplayName(attunement.level))
             }
         }
 
-        event.toolTip.addAll(1, attunements.map { it.getDisplay(false).formattedText })
+        event.toolTip.addAll(1, attunements.map { it.getDisplay(false) })
     }
+
     /**
      * This deals with attacks between two entities. Nothing more
      */
@@ -40,7 +41,7 @@ object QuenchEventHandler {
 
         val interaction = AttackInteraction(attacked, damageSource, event.amount)
 
-        if (attacker is EntityLivingBase) {
+        if (attacker is LivingEntity) {
             SymphonyAPI.getAllAttunements(attacker).forEach { it.onUserAttackEntity(interaction) }
         }
 
@@ -52,9 +53,9 @@ object QuenchEventHandler {
         if (attackerPct != 0f) {
             attacker.attackEntityFrom(ReflectedDamageSource(attacked), attackerPct * interaction.damage)
 
-            if (attacker is EntityLivingBase) {
+            if (attacker is LivingEntity) {
                 interaction.effects
-                        .map { PotionEffect(it.potion, (it.duration * attackerPct).toInt(), it.amplifier, it.isAmbient, it.doesShowParticles()) }
+                        .map { EffectInstance(it.potion, (it.duration * attackerPct).toInt(), it.amplifier, it.isAmbient, it.doesShowParticles()) }
                         .forEach(attacker::addPotionEffect)
             }
         }
@@ -70,7 +71,7 @@ object QuenchEventHandler {
 
 }
 
-class ReflectedDamageSource(attacked: EntityLivingBase) : EntityDamageSource("reflected", attacked) {
+class ReflectedDamageSource(attacked: LivingEntity) : EntityDamageSource("reflected", attacked) {
     override fun getIsThornsDamage() = true
 
     override fun isMagicDamage() = true

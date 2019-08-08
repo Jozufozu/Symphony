@@ -1,19 +1,20 @@
-package com.jozufozu.quench.api.interactions;
+package com.jozufozu.symphony.api.interactions;
 
 import com.google.common.collect.Lists;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.potion.PotionEffect;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.potion.Effect;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.DamageSource;
 
 import java.util.List;
 
 public class AttackInteraction
 {
-    private EntityLivingBase attacker;
+    private LivingEntity attacker;
     private DamageSource damageSource;
 
-    private List<EntityLivingBase> entities;
-    private List<PotionEffect> effects;
+    private List<LivingEntity> entities;
+    private List<EffectInstance> effects;
 
     private float damage;
     private float knockback;
@@ -22,26 +23,26 @@ public class AttackInteraction
 
     private float reflection;
 
-    public AttackInteraction(EntityLivingBase attacked, DamageSource damageSource)
+    public AttackInteraction(LivingEntity attacked, DamageSource damageSource)
     {
         this.damageSource = damageSource;
         this.entities = Lists.newArrayList(attacked);
         this.effects = Lists.newArrayList();
 
-        if (damageSource.getTrueSource() instanceof EntityLivingBase)
-            this.attacker = ((EntityLivingBase) damageSource.getTrueSource());
+        if (damageSource.getTrueSource() instanceof LivingEntity)
+            this.attacker = ((LivingEntity) damageSource.getTrueSource());
     }
 
-    public AttackInteraction(EntityLivingBase attacked, DamageSource damageSource, float damage)
+    public AttackInteraction(LivingEntity attacked, DamageSource damageSource, float damage)
     {
         this(attacked, damageSource);
         this.damage = damage;
     }
 
     /**
-     * The {@link EntityLivingBase} that initiated the attack
+     * The {@link LivingEntity} that initiated the attack
      */
-    public EntityLivingBase getAttacker()
+    public LivingEntity getAttacker()
     {
         return attacker;
     }
@@ -57,15 +58,15 @@ public class AttackInteraction
     }
 
     /**
-     * A list of {@link EntityLivingBase}s who will feel this attack.<br>
+     * A list of {@link LivingEntity}s who will feel this attack.<br>
      * Typically only one
      */
-    public List<EntityLivingBase> getEntities()
+    public List<LivingEntity> getEntities()
     {
         return entities;
     }
 
-    public List<PotionEffect> getEffects()
+    public List<EffectInstance> getEffects()
     {
         return effects;
     }

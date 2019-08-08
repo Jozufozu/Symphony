@@ -1,4 +1,4 @@
-package com.jozufozu.quench.common.block
+package com.jozufozu.symphony.common.block
 
 import net.minecraft.block.Block
 import net.minecraft.block.ITileEntityProvider

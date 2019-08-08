@@ -1,6 +1,6 @@
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-package com.jozufozu.quench.common.block;
+package com.jozufozu.symphony.api;
 
 import mcp.MethodsReturnNonnullByDefault;
 

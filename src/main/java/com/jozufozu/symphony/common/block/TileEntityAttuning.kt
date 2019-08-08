@@ -1,6 +1,5 @@
-package com.jozufozu.quench.common.block
+package com.jozufozu.symphony.common.block
 
-import net.minecraft.item.ItemStack
 import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.EnumFacing
 import net.minecraft.util.ITickable
