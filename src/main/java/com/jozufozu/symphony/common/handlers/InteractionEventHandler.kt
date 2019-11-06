@@ -2,7 +2,7 @@ package com.jozufozu.symphony.common.handlers
 
 import com.jozufozu.symphony.api.SymphonyAPI
 import com.jozufozu.symphony.api.interactions.AttackInteraction
-import com.jozufozu.symphony.common.attunements.EnchantmentNoteType
+import com.jozufozu.symphony.common.attunements.EnchantmentAttunementType
 import net.minecraft.entity.LivingEntity
 import net.minecraft.potion.EffectInstance
 import net.minecraft.util.EntityDamageSource
@@ -20,7 +20,7 @@ object InteractionEventHandler {
         val attunements = SymphonyAPI.getStackAttunements(event.itemStack)
 
         for (attunement in attunements) {
-            if (attunement is EnchantmentNoteType.AttunementEnchantment) {
+            if (attunement is EnchantmentAttunementType.AttunementEnchantment) {
                 event.toolTip.remove(attunement.getEnchantment().getDisplayName(attunement.level))
             }
         }
@@ -54,18 +54,16 @@ object InteractionEventHandler {
             attacker.attackEntityFrom(ReflectedDamageSource(attacked), attackerPct * interaction.damage)
 
             if (attacker is LivingEntity) {
-                interaction.effects
-                        .map { EffectInstance(it.potion, (it.duration * attackerPct).toInt(), it.amplifier, it.isAmbient, it.doesShowParticles()) }
-                        .forEach(attacker::addPotionEffect)
+                interaction.effects.forEach {
+                    attacker.addPotionEffect(EffectInstance(it.potion, (it.duration * attackerPct).toInt(), it.amplifier, it.isAmbient, it.doesShowParticles()))
+                }
             }
         }
 
         event.amount = interaction.damage * attackedPct
 
         if (attackedPct != 0f) {
-            interaction.effects.forEach(attacked::addPotionEffect)
-
-
+            interaction.effects.forEach { attacked.addPotionEffect(it) }
         }
     }
 

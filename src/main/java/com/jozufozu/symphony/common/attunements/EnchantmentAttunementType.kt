@@ -1,28 +1,31 @@
 package com.jozufozu.symphony.common.attunements
 
-import com.jozufozu.symphony.api.NoteType
 import com.jozufozu.symphony.api.Attunement
+import com.jozufozu.symphony.api.AttunementType
 import net.minecraft.enchantment.Enchantment
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundNBT
+import net.minecraft.nbt.INBT
+import net.minecraft.nbt.IntNBT
 import net.minecraft.util.ResourceLocation
-import net.minecraft.util.text.*
-import java.util.*
+import net.minecraft.util.text.ITextComponent
+import net.minecraft.util.text.Style
+import net.minecraft.util.text.TextFormatting
 
-class EnchantmentNoteType(val enchantment: Enchantment) : NoteType() {
+class EnchantmentAttunementType(val enchantment: Enchantment) : AttunementType<EnchantmentAttunementType.AttunementEnchantment>() {
     init {
         registryName = enchantment.registryName
     }
 
     override fun canBeApplied(stack: ItemStack): Boolean = enchantment.canApply(stack)
 
-    override fun attune(stack: ItemStack, attunement: Attunement<*>) {
+    override fun attune(stack: ItemStack, attunement: Attunement) {
         (attunement as? AttunementEnchantment)?.let {
             stack.addEnchantment(enchantment, it.level)
         }
     }
 
-    override fun remove(stack: ItemStack, attuned: Attunement<*>) {
+    override fun remove(stack: ItemStack, attuned: Attunement) {
         (attuned as? AttunementEnchantment)?.let { note ->
             val list = stack.enchantmentTagList.listIterator()
 
@@ -37,9 +40,11 @@ class EnchantmentNoteType(val enchantment: Enchantment) : NoteType() {
         }
     }
 
-    override fun instantiate() = AttunementEnchantment()
+    override fun create() = AttunementEnchantment(0)
 
-    inner class AttunementEnchantment : AttunementLeveled() {
+    override fun deserialize(nbt: INBT) = AttunementEnchantment((nbt as? IntNBT)?.int ?: throw IllegalArgumentException(""))
+
+    inner class AttunementEnchantment(level: Int) : LeveledAttunement(0) {
         fun getEnchantment(): Enchantment = enchantment
 
         override fun getDisplay(advanced: Boolean): ITextComponent = with(enchantment.getDisplayName(level)) {
@@ -50,7 +55,5 @@ class EnchantmentNoteType(val enchantment: Enchantment) : NoteType() {
         }
 
         override val colorRGB: Int = 0
-
-        override fun amplify(): Optional<Attunement<*>> = Optional.of(AttunementEnchantment().also { it.level = this.level + 1 })
     }
 }
