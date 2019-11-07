@@ -1,13 +1,23 @@
-package com.jozufozu.symphony;
+package com.jozufozu.symphony
 
-import com.jozufozu.symphony.api.SymphonyAPI;
-import net.minecraftforge.fml.common.Mod;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.jozufozu.symphony.api.AttunementType
+import com.jozufozu.symphony.api.SymphonyAPI
+import net.alexwells.kottle.FMLKotlinModLoadingContext
+import net.minecraftforge.common.MinecraftForge
+import net.minecraftforge.event.RegistryEvent
+import net.minecraftforge.fml.common.Mod
+import net.minecraftforge.registries.RegistryBuilder
 
 @Mod(Symphony.MODID)
-public class Symphony
-{
-    public static final String MODID = "symphony";
-    public static Logger LOG = SymphonyAPI.log = LogManager.getLogger(MODID);;
+object Symphony {
+    const val MODID = "symphony"
+
+    init {
+        FMLKotlinModLoadingContext.get().modEventBus.addListener<RegistryEvent.NewRegistry> { onRegistryRegister(it) }
+    }
+
+
+    fun onRegistryRegister(event: RegistryEvent.NewRegistry) {
+        SymphonyAPI.registry = RegistryBuilder<AttunementType<*>>().setType(AttunementType::class.java).setName(SymphonyAPI.registryId).create()
+    }
 }

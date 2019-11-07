@@ -1,5 +1,5 @@
-modLoader="javafml"
-loaderVersion="[28,)"
+modLoader="kotlinfml"
+loaderVersion="[1,)"
 issueTrackerURL="http://my.issue.tracker/"
 [[mods]]
 modId="symphony"

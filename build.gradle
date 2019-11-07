@@ -14,10 +14,10 @@ apply plugin: 'kotlin'
 apply plugin: 'maven-publish'
 
 version = "0.0.1"
-group = 'com.jozufozu.symphony' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group = 'com.jozufozu.symphony'
 archivesBaseName = 'symphony'
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = compileKotlin.kotlinOptions.jvmTarget = compileTestKotlin.kotlinOptions.jvmTarget = '1.8'
 
 minecraft {
     mappings channel: 'snapshot', version: '20190719-1.14.3'
