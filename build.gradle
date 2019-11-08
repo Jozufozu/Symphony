@@ -65,9 +65,28 @@ repositories {
     maven { url 'https://minecraft.curseforge.com/api/maven/' }
 }
 
+configurations {
+    mod
+}
+
 dependencies {
     minecraft "net.minecraftforge:forge:$minecraft_version-$forge_version"
     compile "kottle:Kottle:$kottle_version"
+    mod "kottle:Kottle:$kottle_version"
+}
+
+task installMods(type: Copy, dependsOn: "deinstallMods") {
+    from { configurations.mod }
+    include "**/*.jar"
+    into file("run/mods")
+}
+
+task deinstallMods(type: Delete) {
+    delete fileTree(dir: "run/mods", include: "*.jar")
+}
+
+project.afterEvaluate {
+    project.tasks['prepareRuns'].dependsOn(project.tasks['installMods'])
 }
 
 jar {

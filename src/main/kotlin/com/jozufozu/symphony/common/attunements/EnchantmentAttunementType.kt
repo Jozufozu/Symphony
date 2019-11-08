@@ -1,6 +1,7 @@
 package com.jozufozu.symphony.common.attunements
 
 import com.jozufozu.symphony.api.Attunement
+import com.jozufozu.symphony.api.AttunementSerializationException
 import com.jozufozu.symphony.api.AttunementType
 import net.minecraft.enchantment.Enchantment
 import net.minecraft.item.ItemStack
@@ -12,7 +13,7 @@ import net.minecraft.util.text.ITextComponent
 import net.minecraft.util.text.Style
 import net.minecraft.util.text.TextFormatting
 
-class EnchantmentAttunementType(val enchantment: Enchantment) : AttunementType<EnchantmentAttunementType.AttunementEnchantment>() {
+class EnchantmentAttunementType(val enchantment: Enchantment) : AttunementType<EnchantmentAttunementType.EnchantmentAttunement>() {
     init {
         registryName = enchantment.registryName
     }
@@ -20,13 +21,13 @@ class EnchantmentAttunementType(val enchantment: Enchantment) : AttunementType<E
     override fun canBeApplied(stack: ItemStack): Boolean = enchantment.canApply(stack)
 
     override fun attune(stack: ItemStack, attunement: Attunement) {
-        (attunement as? AttunementEnchantment)?.let {
+        (attunement as? EnchantmentAttunement)?.let {
             stack.addEnchantment(enchantment, it.level)
         }
     }
 
     override fun remove(stack: ItemStack, attuned: Attunement) {
-        (attuned as? AttunementEnchantment)?.let { note ->
+        (attuned as? EnchantmentAttunement)?.let { note ->
             val list = stack.enchantmentTagList.listIterator()
 
             for (tag in list) {
@@ -40,11 +41,15 @@ class EnchantmentAttunementType(val enchantment: Enchantment) : AttunementType<E
         }
     }
 
-    override fun create() = AttunementEnchantment(0)
+    override fun create() = EnchantmentAttunement(0)
 
-    override fun deserialize(nbt: INBT) = AttunementEnchantment((nbt as? IntNBT)?.int ?: throw IllegalArgumentException(""))
+    override fun deserialize(nbt: INBT) = EnchantmentAttunement((nbt as? IntNBT)?.int ?: throw AttunementSerializationException(""))
 
-    inner class AttunementEnchantment(level: Int) : LeveledAttunement(0) {
+    inner class EnchantmentAttunement(level: Int) : LeveledAttunement(level) {
+        constructor(nbt: IntNBT): this(nbt.int)
+
+        override val name: ResourceLocation get() = registryName!!
+
         fun getEnchantment(): Enchantment = enchantment
 
         override fun getDisplay(advanced: Boolean): ITextComponent = with(enchantment.getDisplayName(level)) {

@@ -3,6 +3,7 @@ package com.jozufozu.symphony.common.handlers
 import com.jozufozu.symphony.api.SymphonyAPI
 import com.jozufozu.symphony.api.interactions.AttackInteraction
 import com.jozufozu.symphony.common.attunements.EnchantmentAttunementType
+import net.minecraft.entity.Entity
 import net.minecraft.entity.LivingEntity
 import net.minecraft.potion.EffectInstance
 import net.minecraft.util.EntityDamageSource
@@ -20,7 +21,7 @@ object InteractionEventHandler {
         val attunements = SymphonyAPI.getStackAttunements(event.itemStack)
 
         for (attunement in attunements) {
-            if (attunement is EnchantmentAttunementType.AttunementEnchantment) {
+            if (attunement is EnchantmentAttunementType.EnchantmentAttunement) {
                 event.toolTip.remove(attunement.getEnchantment().getDisplayName(attunement.level))
             }
         }
@@ -69,7 +70,7 @@ object InteractionEventHandler {
 
 }
 
-class ReflectedDamageSource(attacked: LivingEntity) : EntityDamageSource("reflected", attacked) {
+class ReflectedDamageSource(attacked: LivingEntity) : EntityDamageSource("reflected", attacked as Entity) {
     override fun getIsThornsDamage() = true
 
     override fun isMagicDamage() = true

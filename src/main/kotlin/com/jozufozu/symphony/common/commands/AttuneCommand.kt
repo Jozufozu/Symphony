@@ -8,6 +8,5 @@ import net.minecraft.command.arguments.EntityArgument
 object AttuneCommand {
     fun register(dispatcher: CommandDispatcher<CommandSource>) = dispatcher.register(Commands.literal("attune")
             .requires { it.hasPermissionLevel(2) }
-            .then(Commands.argument("targets", EntityArgument.entities())
-                    .then()))
+            .then(Commands.argument("targets", EntityArgument.entities())))
 }

@@ -2,11 +2,8 @@ package com.jozufozu.symphony.api
 
 import com.jozufozu.symphony.Symphony
 import net.minecraft.entity.LivingEntity
-import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.EquipmentSlotType
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.CompoundNBT
-import net.minecraft.nbt.ListNBT
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.common.util.Constants
 import net.minecraftforge.registries.IForgeRegistry
@@ -37,6 +34,19 @@ object SymphonyAPI {
     }
 
     fun attuneStack(stack: ItemStack, attunement: Attunement): Boolean {
+        registry.getValue(attunement.name)?.let {
+            if (it.canBeApplied(stack)) {
+                val symphony = stack.orCreateTag.getCompound(registryName)
+
+                val name = attunement.name.toString()
+                if (symphony.contains(name)) {
+                    return false
+                }
+                symphony.put(name, attunement.serializeNBT())
+                it.attune(stack, attunement)
+                return true
+            }
+        }
         return false
     }
 
@@ -45,25 +55,20 @@ object SymphonyAPI {
 
         if (compound == null || compound.contains(registryName, Constants.NBT.TAG_COMPOUND)) return emptyList()
 
-        val symphony = compound.getList(registryName, Constants.NBT.TAG_COMPOUND)
+        val symphony = compound.getCompound(registryName)
 
         val attunements = ArrayList<Attunement>()
 
-        val numSockets = symphony.size
+        for (name in symphony.keySet()) {
+            val attunementNBT = symphony.get(name) ?: continue
 
-        for (i in 0 until numSockets) {
-            val book = symphony.getCompound(i)
+            val location = ResourceLocation(name)
+            val enchantment = registry.getValue(location) ?: continue
 
-            for (name in book.keySet()) {
-                val location = ResourceLocation(name)
-                val enchantment = registry.getValue(location) ?: continue
-
-                try {
-                    attunements.add(enchantment.deserialize(book[name] ?: continue))
-                } catch (e: Exception) {
-                    log.error("Tried to initialize a note of type '$location', but it has no default constructor! This is a programmer error!")
-                }
-
+            try {
+                attunements.add(enchantment.deserialize(attunementNBT))
+            } catch (exc: AttunementSerializationException) {
+                // TODO
             }
         }
 

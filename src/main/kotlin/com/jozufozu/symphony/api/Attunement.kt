@@ -3,13 +3,13 @@ package com.jozufozu.symphony.api
 import com.jozufozu.symphony.api.interactions.AttackInteraction
 import net.minecraft.entity.LivingEntity
 import net.minecraft.nbt.INBT
+import net.minecraft.util.ResourceLocation
 import net.minecraft.util.text.ITextComponent
 
-abstract class Attunement() {
-
-    constructor(nbt: INBT): this()
-
+abstract class Attunement {
     abstract val colorRGB: Int
+
+    abstract val name: ResourceLocation
 
     abstract fun getDisplay(advanced: Boolean): ITextComponent
 

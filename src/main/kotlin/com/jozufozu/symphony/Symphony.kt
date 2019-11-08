@@ -3,7 +3,6 @@ package com.jozufozu.symphony
 import com.jozufozu.symphony.api.AttunementType
 import com.jozufozu.symphony.api.SymphonyAPI
 import net.alexwells.kottle.FMLKotlinModLoadingContext
-import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.registries.RegistryBuilder
@@ -14,6 +13,7 @@ object Symphony {
 
     init {
         FMLKotlinModLoadingContext.get().modEventBus.addListener<RegistryEvent.NewRegistry> { onRegistryRegister(it) }
+        FMLKotlinModLoadingContext.get().modEventBus.addGenericListener(AttunementType::class.java) { SymphonyAPI.log.info("REGISTER STUFF") }
     }
 
 

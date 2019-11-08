@@ -22,9 +22,10 @@ abstract class AttunementType<T : Attunement> : ForgeRegistryEntry<AttunementTyp
     /**
      * Create a "zeroed" instance of this attunement
      */
-    abstract fun create(): Attunement
+    abstract fun create(): T
 
-    abstract fun deserialize(nbt: INBT): Attunement
+    @Throws(AttunementSerializationException::class)
+    abstract fun deserialize(nbt: INBT): T
 
     // TODO: Add some way to get variations of this note type for loot generation
 }
