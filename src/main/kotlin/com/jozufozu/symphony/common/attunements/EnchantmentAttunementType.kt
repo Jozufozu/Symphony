@@ -12,6 +12,8 @@ import net.minecraft.util.ResourceLocation
 import net.minecraft.util.text.ITextComponent
 import net.minecraft.util.text.Style
 import net.minecraft.util.text.TextFormatting
+import net.minecraftforge.event.RegistryEvent
+import net.minecraftforge.registries.ForgeRegistries
 
 class EnchantmentAttunementType(val enchantment: Enchantment) : AttunementType<EnchantmentAttunementType.EnchantmentAttunement>() {
     init {
@@ -60,5 +62,13 @@ class EnchantmentAttunementType(val enchantment: Enchantment) : AttunementType<E
         }
 
         override val colorRGB: Int = 0
+    }
+
+    companion object {
+        fun registerAttunements(event: RegistryEvent.Register<AttunementType<*>>) {
+            for (enchantment in ForgeRegistries.ENCHANTMENTS) {
+                event.registry.register(EnchantmentAttunementType(enchantment))
+            }
+        }
     }
 }
