@@ -7,10 +7,12 @@ import com.jozufozu.symphony.common.attunements.EnchantmentAttunementType
 import net.alexwells.kottle.KotlinEventBusSubscriber
 import net.minecraft.entity.LivingEntity
 import net.minecraft.inventory.EquipmentSlotType
+import net.minecraft.item.ItemStack
 import net.minecraft.potion.EffectInstance
 import net.minecraftforge.event.entity.living.LivingDamageEvent
 import net.minecraftforge.event.entity.player.ItemTooltipEvent
 import net.minecraftforge.eventbus.api.SubscribeEvent
+import kotlin.math.ceil
 import kotlin.math.max
 
 @KotlinEventBusSubscriber(bus = KotlinEventBusSubscriber.Bus.FORGE)
@@ -43,13 +45,17 @@ object InteractionEventHandler {
         val interaction = AttackInteraction(attacked, damageSource, event.amount)
 
         if (attacker is LivingEntity) {
-            SymphonyAPI.runOnAllAttunements(attacker) { equipmentType: EquipmentSlotType, attunement: Attunement ->
-                attunement.onUserAttackEntity(equipmentType, interaction)
+            SymphonyAPI.runOnAllAttunements(attacker) { stack: ItemStack, equipmentType: EquipmentSlotType, attunement: Attunement ->
+                attunement.onUserAttackEntity(stack, equipmentType, interaction)
+
+                if (attunement.dirty) {
+                    SymphonyAPI.updateAttunement(stack, attunement)
+                }
             }
         }
 
-        SymphonyAPI.runOnAllAttunements(attacked) { equipmentType: EquipmentSlotType, attunement: Attunement ->
-            attunement.onUserAttackEntity(equipmentType, interaction)
+        SymphonyAPI.runOnAllAttunements(attacked) { stack: ItemStack, equipmentType: EquipmentSlotType, attunement: Attunement ->
+            attunement.onUserAttackedByEntity(stack, equipmentType, interaction)
         }
 
         val attackedPct = max(1.0f - interaction.reflection, 0.0f)
@@ -63,13 +69,24 @@ object InteractionEventHandler {
                     attacker.addPotionEffect(EffectInstance(it.potion, (it.duration * attackerPct).toInt(), it.amplifier, it.isAmbient, it.doesShowParticles()))
                 }
             }
+
+            if (!attacker.isImmuneToFire) {
+                val fire = ceil(interaction.fireTime * attackerPct).toInt()
+
+                attacker.setFire(fire)
+            }
         }
 
         event.amount = interaction.damage * attackedPct
+
+        if (!attacked.isImmuneToFire) {
+            val fire = ceil(interaction.fireTime * attackedPct).toInt()
+
+            attacker.setFire(fire)
+        }
 
         if (attackedPct != 0f) {
             interaction.effects.forEach { attacked.addPotionEffect(it) }
         }
     }
-
 }

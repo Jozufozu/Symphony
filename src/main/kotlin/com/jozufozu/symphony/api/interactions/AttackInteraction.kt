@@ -1,6 +1,5 @@
 package com.jozufozu.symphony.api.interactions
 
-import com.google.common.collect.Lists
 import net.minecraft.entity.LivingEntity
 import net.minecraft.potion.EffectInstance
 import net.minecraft.util.DamageSource
@@ -16,8 +15,8 @@ class AttackInteraction(attacked: LivingEntity, var damageSource: DamageSource?)
      * A list of [LivingEntity]s who will feel this attack.<br></br>
      * Typically only one
      */
-    val entities: List<LivingEntity>
-    val effects: List<EffectInstance>
+    val entities: List<LivingEntity> = arrayListOf(attacked)
+    val effects: List<EffectInstance> = arrayListOf()
 
     var damage: Float = 0f
     var knockback: Float = 0f
@@ -33,9 +32,6 @@ class AttackInteraction(attacked: LivingEntity, var damageSource: DamageSource?)
     var reflection: Float = 0f
 
     init {
-        this.entities = Lists.newArrayList(attacked)
-        this.effects = Lists.newArrayList()
-
         if (damageSource?.trueSource is LivingEntity)
             this.attacker = damageSource?.trueSource as LivingEntity
     }

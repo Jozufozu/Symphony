@@ -22,10 +22,11 @@ object SymphonyAPI {
 
     lateinit var registry: IForgeRegistry<AttunementType<*>>
 
-    fun runOnAllAttunements(entity: LivingEntity, callback: (EquipmentSlotType, Attunement) -> Unit) {
+    fun runOnAllAttunements(entity: LivingEntity, action: (ItemStack, EquipmentSlotType, Attunement) -> Unit) {
         for (equipmentSlotType in EquipmentSlotType.values()) {
-            for (attunement in getStackAttunements(entity.getItemStackFromSlot(equipmentSlotType))) {
-                callback(equipmentSlotType, attunement)
+            val stack = entity.getItemStackFromSlot(equipmentSlotType)
+            for (attunement in getStackAttunements(stack)) {
+                action(stack, equipmentSlotType, attunement)
             }
         }
     }
@@ -41,7 +42,7 @@ object SymphonyAPI {
         if (attunement.canBeApplied(stack)) {
             val symphony = stack.orCreateTag.getCompound(registryName)
 
-            val name = attunement.name.toString()
+            val name = attunement.type.registryName?.toString() ?: return false
             if (symphony.contains(name)) {
                 return false
             }
@@ -56,7 +57,7 @@ object SymphonyAPI {
     fun updateAttunement(stack: ItemStack, attunement: Attunement) {
         val symphony = stack.orCreateTag.getCompound(registryName)
 
-        val name = attunement.name.toString()
+        val name = attunement.type.registryName?.toString() ?: return
         symphony.put(name, attunement.serializeNBT())
         attunement.remove(stack)
         attunement.attune(stack)

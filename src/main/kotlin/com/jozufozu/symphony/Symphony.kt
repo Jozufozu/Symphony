@@ -2,7 +2,6 @@ package com.jozufozu.symphony
 
 import com.jozufozu.symphony.api.AttunementType
 import com.jozufozu.symphony.api.SymphonyAPI
-import com.jozufozu.symphony.common.attunements.EnchantmentAttunementType
 import net.alexwells.kottle.FMLKotlinModLoadingContext
 import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.fml.common.Mod
@@ -14,7 +13,6 @@ object Symphony {
 
     init {
         FMLKotlinModLoadingContext.get().modEventBus.addListener<RegistryEvent.NewRegistry> { onRegistryRegister(it) }
-        FMLKotlinModLoadingContext.get().modEventBus.addGenericListener<RegistryEvent.Register<AttunementType<*>>, AttunementType<*>>(AttunementType::class.java) { EnchantmentAttunementType.registerAttunements(it) }
     }
 
 

@@ -12,20 +12,20 @@ import net.minecraft.util.ResourceLocation
 import net.minecraft.util.text.ITextComponent
 import net.minecraft.util.text.Style
 import net.minecraft.util.text.TextFormatting
-import net.minecraftforge.event.RegistryEvent
-import net.minecraftforge.registries.ForgeRegistries
 
 class EnchantmentAttunementType(val enchantment: Enchantment) : AttunementType<EnchantmentAttunementType.EnchantmentAttunement>() {
     init {
         registryName = enchantment.registryName
     }
 
-    override fun create() = EnchantmentAttunement(0)
+    override fun create() = EnchantmentAttunement(this, 0)
 
-    override fun deserialize(nbt: INBT) = EnchantmentAttunement((nbt as? IntNBT)?.int ?: throw AttunementSerializationException(""))
+    override fun deserialize(nbt: INBT): EnchantmentAttunement {
+        val level = (nbt as? IntNBT)?.int ?: throw AttunementSerializationException("")
+        return EnchantmentAttunement(this, level)
+    }
 
-    inner class EnchantmentAttunement(val level: Int) : Attunement() {
-        constructor(nbt: IntNBT): this(nbt.int)
+    inner class EnchantmentAttunement(type: EnchantmentAttunementType, val level: Int) : Attunement(type) {
 
         override fun canBeApplied(stack: ItemStack): Boolean = enchantment.canApply(stack)
 
@@ -46,8 +46,6 @@ class EnchantmentAttunementType(val enchantment: Enchantment) : AttunementType<E
             }
         }
 
-        override val name: ResourceLocation get() = registryName!!
-
         fun getEnchantment(): Enchantment = enchantment
 
         override fun getDisplay(advanced: Boolean): ITextComponent = with(enchantment.getDisplayName(level)) {
@@ -58,13 +56,5 @@ class EnchantmentAttunementType(val enchantment: Enchantment) : AttunementType<E
         }
 
         override fun serializeNBT() = IntNBT(level)
-    }
-
-    companion object {
-        fun registerAttunements(event: RegistryEvent.Register<AttunementType<*>>) {
-            for (enchantment in ForgeRegistries.ENCHANTMENTS) {
-                event.registry.register(EnchantmentAttunementType(enchantment))
-            }
-        }
     }
 }
