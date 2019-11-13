@@ -20,35 +20,31 @@ class EnchantmentAttunementType(val enchantment: Enchantment) : AttunementType<E
         registryName = enchantment.registryName
     }
 
-    override fun canBeApplied(stack: ItemStack): Boolean = enchantment.canApply(stack)
+    override fun create() = EnchantmentAttunement(0)
 
-    override fun attune(stack: ItemStack, attunement: Attunement) {
-        (attunement as? EnchantmentAttunement)?.let {
-            stack.addEnchantment(enchantment, it.level)
+    override fun deserialize(nbt: INBT) = EnchantmentAttunement((nbt as? IntNBT)?.int ?: throw AttunementSerializationException(""))
+
+    inner class EnchantmentAttunement(val level: Int) : Attunement() {
+        constructor(nbt: IntNBT): this(nbt.int)
+
+        override fun canBeApplied(stack: ItemStack): Boolean = enchantment.canApply(stack)
+
+        override fun attune(stack: ItemStack) {
+            stack.addEnchantment(enchantment, level)
         }
-    }
 
-    override fun remove(stack: ItemStack, attuned: Attunement) {
-        (attuned as? EnchantmentAttunement)?.let { note ->
+        override fun remove(stack: ItemStack) {
             val list = stack.enchantmentTagList.listIterator()
 
             for (tag in list) {
                 if (tag is CompoundNBT) {
                     val name = ResourceLocation.tryCreate(tag.getString("id"))
-                    if (enchantment.registryName == name && note.level == tag.getInt("lvl")) {
+                    if (enchantment.registryName == name && level == tag.getInt("lvl")) {
                         list.remove()
                     }
                 }
             }
         }
-    }
-
-    override fun create() = EnchantmentAttunement(0)
-
-    override fun deserialize(nbt: INBT) = EnchantmentAttunement((nbt as? IntNBT)?.int ?: throw AttunementSerializationException(""))
-
-    inner class EnchantmentAttunement(level: Int) : LeveledAttunement(level) {
-        constructor(nbt: IntNBT): this(nbt.int)
 
         override val name: ResourceLocation get() = registryName!!
 
@@ -56,12 +52,12 @@ class EnchantmentAttunementType(val enchantment: Enchantment) : AttunementType<E
 
         override fun getDisplay(advanced: Boolean): ITextComponent = with(enchantment.getDisplayName(level)) {
             val style = with(Style()) {
-                setColor(TextFormatting.AQUA)
+                setColor(TextFormatting.DARK_GREEN)
             }
             setStyle(style)
         }
 
-        override val colorRGB: Int = 0
+        override fun serializeNBT() = IntNBT(level)
     }
 
     companion object {

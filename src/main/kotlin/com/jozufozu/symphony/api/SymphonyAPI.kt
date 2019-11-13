@@ -22,6 +22,14 @@ object SymphonyAPI {
 
     lateinit var registry: IForgeRegistry<AttunementType<*>>
 
+    fun runOnAllAttunements(entity: LivingEntity, callback: (EquipmentSlotType, Attunement) -> Unit) {
+        for (equipmentSlotType in EquipmentSlotType.values()) {
+            for (attunement in getStackAttunements(entity.getItemStackFromSlot(equipmentSlotType))) {
+                callback(equipmentSlotType, attunement)
+            }
+        }
+    }
+
     fun getAllAttunements(entity: LivingEntity): List<Attunement> {
         return Arrays.stream(EquipmentSlotType.values())
                 .map(entity::getItemStackFromSlot)
@@ -29,47 +37,48 @@ object SymphonyAPI {
                 .collect(Collectors.toList())
     }
 
-    fun isTargetableItem(stack: ItemStack): Boolean {
-        return true
-    }
-
     fun attuneStack(stack: ItemStack, attunement: Attunement): Boolean {
-        registry.getValue(attunement.name)?.let {
-            if (it.canBeApplied(stack)) {
-                val symphony = stack.orCreateTag.getCompound(registryName)
+        if (attunement.canBeApplied(stack)) {
+            val symphony = stack.orCreateTag.getCompound(registryName)
 
-                val name = attunement.name.toString()
-                if (symphony.contains(name)) {
-                    return false
-                }
-                symphony.put(name, attunement.serializeNBT())
-                it.attune(stack, attunement)
-                return true
+            val name = attunement.name.toString()
+            if (symphony.contains(name)) {
+                return false
             }
+            symphony.put(name, attunement.serializeNBT())
+            attunement.attune(stack)
+            stack.setTagInfo(registryName, symphony)
+            return true
         }
         return false
+    }
+
+    fun updateAttunement(stack: ItemStack, attunement: Attunement) {
+        val symphony = stack.orCreateTag.getCompound(registryName)
+
+        val name = attunement.name.toString()
+        symphony.put(name, attunement.serializeNBT())
+        attunement.remove(stack)
+        attunement.attune(stack)
+        stack.setTagInfo(registryName, symphony)
     }
 
     fun getStackAttunements(stack: ItemStack): List<Attunement> {
         val compound = stack.tag
 
-        if (compound == null || compound.contains(registryName, Constants.NBT.TAG_COMPOUND)) return emptyList()
+        if (compound == null || !compound.contains(registryName, Constants.NBT.TAG_COMPOUND)) return emptyList()
 
         val symphony = compound.getCompound(registryName)
 
         val attunements = ArrayList<Attunement>()
 
         for (name in symphony.keySet()) {
-            val attunementNBT = symphony.get(name) ?: continue
+            val nbt = symphony.get(name) ?: continue
 
             val location = ResourceLocation(name)
-            val enchantment = registry.getValue(location) ?: continue
+            val type = registry.getValue(location) ?: continue
 
-            try {
-                attunements.add(enchantment.deserialize(attunementNBT))
-            } catch (exc: AttunementSerializationException) {
-                // TODO
-            }
+            attunements.add(type.deserialize(nbt))
         }
 
         return attunements

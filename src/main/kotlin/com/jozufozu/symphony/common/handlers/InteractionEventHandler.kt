@@ -1,23 +1,23 @@
 package com.jozufozu.symphony.common.handlers
 
+import com.jozufozu.symphony.api.Attunement
 import com.jozufozu.symphony.api.SymphonyAPI
 import com.jozufozu.symphony.api.interactions.AttackInteraction
 import com.jozufozu.symphony.common.attunements.EnchantmentAttunementType
-import net.minecraft.entity.Entity
+import net.alexwells.kottle.KotlinEventBusSubscriber
 import net.minecraft.entity.LivingEntity
+import net.minecraft.inventory.EquipmentSlotType
 import net.minecraft.potion.EffectInstance
-import net.minecraft.util.EntityDamageSource
 import net.minecraftforge.event.entity.living.LivingDamageEvent
 import net.minecraftforge.event.entity.player.ItemTooltipEvent
 import net.minecraftforge.eventbus.api.SubscribeEvent
-import net.minecraftforge.fml.common.Mod
 import kotlin.math.max
 
-@Mod.EventBusSubscriber
+@KotlinEventBusSubscriber(bus = KotlinEventBusSubscriber.Bus.FORGE)
 object InteractionEventHandler {
 
     @SubscribeEvent
-    @JvmStatic fun alterTooltip(event: ItemTooltipEvent) {
+    fun alterTooltip(event: ItemTooltipEvent) {
         val attunements = SymphonyAPI.getStackAttunements(event.itemStack)
 
         for (attunement in attunements) {
@@ -33,7 +33,7 @@ object InteractionEventHandler {
      * This deals with attacks between two entities. Nothing more
      */
     @SubscribeEvent
-    @JvmStatic fun onAttackEntity(event: LivingDamageEvent) {
+    fun onAttackEntity(event: LivingDamageEvent) {
         val damageSource = event.source
         if (damageSource is ReflectedDamageSource) return
 
@@ -43,10 +43,14 @@ object InteractionEventHandler {
         val interaction = AttackInteraction(attacked, damageSource, event.amount)
 
         if (attacker is LivingEntity) {
-            SymphonyAPI.getAllAttunements(attacker).forEach { it.onUserAttackEntity(interaction) }
+            SymphonyAPI.runOnAllAttunements(attacker) { equipmentType: EquipmentSlotType, attunement: Attunement ->
+                attunement.onUserAttackEntity(equipmentType, interaction)
+            }
         }
 
-        SymphonyAPI.getAllAttunements(attacked).forEach { it.onUserAttackedByEntity(interaction) }
+        SymphonyAPI.runOnAllAttunements(attacked) { equipmentType: EquipmentSlotType, attunement: Attunement ->
+            attunement.onUserAttackEntity(equipmentType, interaction)
+        }
 
         val attackedPct = max(1.0f - interaction.reflection, 0.0f)
         val attackerPct = interaction.reflection
@@ -68,10 +72,4 @@ object InteractionEventHandler {
         }
     }
 
-}
-
-class ReflectedDamageSource(attacked: LivingEntity) : EntityDamageSource("reflected", attacked as Entity) {
-    override fun getIsThornsDamage() = true
-
-    override fun isMagicDamage() = true
 }
