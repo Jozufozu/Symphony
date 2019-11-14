@@ -10,7 +10,12 @@ import net.minecraft.inventory.EquipmentSlotType
 import net.minecraft.item.ItemStack
 import net.minecraft.potion.EffectInstance
 import net.minecraftforge.event.entity.living.LivingDamageEvent
+import net.minecraftforge.event.entity.living.LivingDeathEvent
+import net.minecraftforge.event.entity.living.LivingDropsEvent
+import net.minecraftforge.event.entity.living.LivingEvent
 import net.minecraftforge.event.entity.player.ItemTooltipEvent
+import net.minecraftforge.event.entity.player.PlayerInteractEvent
+import net.minecraftforge.eventbus.api.EventPriority
 import net.minecraftforge.eventbus.api.SubscribeEvent
 import kotlin.math.ceil
 import kotlin.math.max
@@ -31,8 +36,72 @@ object InteractionEventHandler {
         event.toolTip.addAll(1, attunements.map { it.getDisplay(false) })
     }
 
+    @SubscribeEvent
+    fun onEntityInteract(event: PlayerInteractEvent.EntityInteract) {
+        SymphonyAPI.runOnAllAttunements(event.player) { stack: ItemStack, equipmentType: EquipmentSlotType, attunement: Attunement ->
+            attunement.onEntityInteract(stack, equipmentType, event)
+
+            if (attunement.dirty) {
+                SymphonyAPI.updateAttunement(stack, attunement)
+            }
+        }
+    }
+
+    @SubscribeEvent
+    fun onRightClickBlock(event: PlayerInteractEvent.RightClickBlock) {
+        SymphonyAPI.runOnAllAttunements(event.player) { stack: ItemStack, equipmentType: EquipmentSlotType, attunement: Attunement ->
+            attunement.onRightClickBlock(stack, equipmentType, event)
+
+            if (attunement.dirty) {
+                SymphonyAPI.updateAttunement(stack, attunement)
+            }
+        }
+    }
+
+    @SubscribeEvent
+    fun onUserDeath(event: LivingDeathEvent) {
+        SymphonyAPI.runOnAllAttunements(event.entityLiving) { stack: ItemStack, equipmentType: EquipmentSlotType, attunement: Attunement ->
+            attunement.onUserDeath(stack, equipmentType, event)
+
+            if (attunement.dirty) {
+                SymphonyAPI.updateAttunement(stack, attunement)
+            }
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    fun onUserDrops(event: LivingDropsEvent) {
+        val iterator = event.drops.iterator();
+
+        while (iterator.hasNext()) {
+            val next = iterator.next()
+            val stack = next.item
+            for (attunement in SymphonyAPI.getStackAttunements(stack)) {
+                if (attunement.onUserDrops(stack, event)) {
+                    iterator.remove()
+                }
+
+                if (attunement.dirty) {
+                    SymphonyAPI.updateAttunement(stack, attunement)
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    fun onLivingUpdate(event: LivingEvent.LivingUpdateEvent) {
+        val user = event.entityLiving
+        SymphonyAPI.runOnAllAttunements(user) { stack: ItemStack, equipmentType: EquipmentSlotType, attunement: Attunement ->
+            attunement.onUserUpdate(stack, equipmentType, user)
+
+            if (attunement.dirty) {
+                SymphonyAPI.updateAttunement(stack, attunement)
+            }
+        }
+    }
+
     /**
-     * This deals with attacks between two entities. Nothing more
+     * This deals with attacks between two entities
      */
     @SubscribeEvent
     fun onAttackEntity(event: LivingDamageEvent) {

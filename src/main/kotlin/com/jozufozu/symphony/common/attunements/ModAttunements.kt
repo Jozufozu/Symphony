@@ -14,7 +14,9 @@ import net.minecraftforge.registries.ForgeRegistries
 object ModAttunements {
     private val attunements = arrayListOf<AttunementType<*>>()
 
-    val buildUpAttunement = register("buildup", BasicAttunementType(IntNBT::class.java, ::BuildUpAttunement, ::BuildUpAttunement))
+    val buildUp = register("buildup", BasicAttunementType(IntNBT::class.java, ::BuildUpAttunement, ::BuildUpAttunement))
+    val coalTorch = register("coal_torch", BasicAttunementType(IntNBT::class.java, ::CoalTorchAttunement, ::CoalTorchAttunement))
+    val soulBound = register("soulbound", DatalessAttunementType(SoulBoundAttunement))
 
     @SubscribeEvent
     fun registerAttunements(event: RegistryEvent.Register<AttunementType<*>>) {

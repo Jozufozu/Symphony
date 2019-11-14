@@ -1,7 +1,6 @@
 package com.jozufozu.symphony.common.attunements
 
 import com.jozufozu.symphony.api.Attunement
-import com.jozufozu.symphony.api.AttunementType
 import com.jozufozu.symphony.api.interactions.AttackInteraction
 import net.minecraft.inventory.EquipmentSlotType
 import net.minecraft.item.ItemStack
@@ -11,13 +10,13 @@ import net.minecraft.util.text.StringTextComponent
 import net.minecraft.util.text.Style
 import net.minecraft.util.text.TextFormatting
 
-class BuildUpAttunement(type: AttunementType<*>, var hits: Int) : Attunement(type) {
-    constructor(type: AttunementType<*>, nbt: IntNBT): this(type, nbt.int)
-    constructor(type: AttunementType<*>): this(type, 0)
+class BuildUpAttunement(var hits: Int) : Attunement({ ModAttunements.buildUp }) {
+    constructor(nbt: IntNBT): this(nbt.int)
+    constructor(): this(0)
 
     override fun getDisplay(advanced: Boolean): ITextComponent {
         return when (hits) {
-            in 0..2 -> StringTextComponent("Charging: $hits/3")
+            in 0..2 -> StringTextComponent("Charging: $hits/4")
             3 -> StringTextComponent("Charged").setStyle(Style().setColor(TextFormatting.RED))
             else -> StringTextComponent("hetaonsu")
         }
@@ -28,9 +27,11 @@ class BuildUpAttunement(type: AttunementType<*>, var hits: Int) : Attunement(typ
     override fun serializeNBT() = IntNBT(hits)
 
     override fun onUserAttackEntity(stack: ItemStack, equipmentType: EquipmentSlotType, attack: AttackInteraction) {
-        if (++hits >= 3) {
-            attack.damage *= 1.3f
+        if (++hits >= 4) {
+            attack.damage *= 4.3f
             hits = 0
+        } else {
+            attack.damage *= 0.1f
         }
         dirty = true
     }

@@ -18,14 +18,14 @@ class EnchantmentAttunementType(val enchantment: Enchantment) : AttunementType<E
         registryName = enchantment.registryName
     }
 
-    override fun create() = EnchantmentAttunement(this, 0)
+    override fun create() = EnchantmentAttunement(0)
 
     override fun deserialize(nbt: INBT): EnchantmentAttunement {
         val level = (nbt as? IntNBT)?.int ?: throw AttunementSerializationException("")
-        return EnchantmentAttunement(this, level)
+        return EnchantmentAttunement(level)
     }
 
-    inner class EnchantmentAttunement(type: EnchantmentAttunementType, val level: Int) : Attunement(type) {
+    inner class EnchantmentAttunement(val level: Int) : Attunement({ this }) {
 
         override fun canBeApplied(stack: ItemStack): Boolean = enchantment.canApply(stack)
 

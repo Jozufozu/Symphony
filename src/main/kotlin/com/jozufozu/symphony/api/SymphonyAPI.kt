@@ -4,12 +4,12 @@ import com.jozufozu.symphony.Symphony
 import net.minecraft.entity.LivingEntity
 import net.minecraft.inventory.EquipmentSlotType
 import net.minecraft.item.ItemStack
+import net.minecraft.nbt.CompoundNBT
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.common.util.Constants
 import net.minecraftforge.registries.IForgeRegistry
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-
 import java.util.*
 import java.util.stream.Collectors
 
@@ -42,7 +42,7 @@ object SymphonyAPI {
         if (attunement.canBeApplied(stack)) {
             val symphony = stack.orCreateTag.getCompound(registryName)
 
-            val name = attunement.type.registryName?.toString() ?: return false
+            val name = attunement.type().registryName?.toString() ?: return false
             if (symphony.contains(name)) {
                 return false
             }
@@ -57,14 +57,18 @@ object SymphonyAPI {
     fun updateAttunement(stack: ItemStack, attunement: Attunement) {
         val symphony = stack.orCreateTag.getCompound(registryName)
 
-        val name = attunement.type.registryName?.toString() ?: return
+        val name = attunement.type().registryName?.toString() ?: return
         symphony.put(name, attunement.serializeNBT())
         attunement.remove(stack)
         attunement.attune(stack)
         stack.setTagInfo(registryName, symphony)
     }
 
+    fun stackHasAttunement(stack: ItemStack, attunementType: AttunementType<*>): Boolean = (stack.tag?.get(registryName) as? CompoundNBT)?.contains(attunementType.registryName.toString()) ?: false
+
     fun getStackAttunements(stack: ItemStack): List<Attunement> {
+        if (stack.isEmpty) return emptyList()
+
         val compound = stack.tag
 
         if (compound == null || !compound.contains(registryName, Constants.NBT.TAG_COMPOUND)) return emptyList()
