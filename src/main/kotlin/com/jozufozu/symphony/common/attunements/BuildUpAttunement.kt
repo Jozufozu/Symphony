@@ -2,6 +2,7 @@ package com.jozufozu.symphony.common.attunements
 
 import com.jozufozu.symphony.api.Attunement
 import com.jozufozu.symphony.api.interactions.AttackInteraction
+import net.minecraft.client.util.ITooltipFlag
 import net.minecraft.inventory.EquipmentSlotType
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.IntNBT
@@ -14,12 +15,12 @@ class BuildUpAttunement(var hits: Int) : Attunement({ ModAttunements.buildUp }) 
     constructor(nbt: IntNBT): this(nbt.int)
     constructor(): this(0)
 
-    override fun getDisplay(advanced: Boolean): ITextComponent {
-        return when (hits) {
+    override fun getDisplay(tooltip: MutableList<ITextComponent>, advanced: ITooltipFlag, expand: Boolean) {
+        tooltip.add(when (hits) {
             in 0..2 -> StringTextComponent("Charging: $hits/4")
             3 -> StringTextComponent("Charged").setStyle(Style().setColor(TextFormatting.RED))
             else -> StringTextComponent("hetaonsu")
-        }
+        })
     }
 
     override fun canBeApplied(stack: ItemStack) = true

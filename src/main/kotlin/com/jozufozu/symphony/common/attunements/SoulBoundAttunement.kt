@@ -3,11 +3,13 @@ package com.jozufozu.symphony.common.attunements
 import com.jozufozu.symphony.api.Attunement
 import com.jozufozu.symphony.api.SymphonyAPI
 import net.alexwells.kottle.KotlinEventBusSubscriber
+import net.minecraft.client.util.ITooltipFlag
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ArmorItem
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.ByteNBT
 import net.minecraft.nbt.INBT
+import net.minecraft.util.text.ITextComponent
 import net.minecraft.util.text.StringTextComponent
 import net.minecraft.util.text.Style
 import net.minecraft.util.text.TextFormatting
@@ -22,7 +24,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent
 object SoulBoundAttunement: Attunement({ ModAttunements.soulBound }) {
     override fun serializeNBT(): INBT = ByteNBT(0)
 
-    override fun getDisplay(advanced: Boolean) = StringTextComponent("Soulbound").setStyle(Style().setColor(TextFormatting.GOLD))
+    override fun getDisplay(tooltip: MutableList<ITextComponent>, advanced: ITooltipFlag, expand: Boolean) {
+        tooltip.add(StringTextComponent("Soulbound").setStyle(Style().setColor(TextFormatting.GOLD)))
+    }
 
     override fun canBeApplied(stack: ItemStack) = true
 

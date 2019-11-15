@@ -2,11 +2,13 @@ package com.jozufozu.symphony.common.attunements
 
 import com.jozufozu.symphony.api.Attunement
 import net.minecraft.block.Blocks
+import net.minecraft.client.util.ITooltipFlag
 import net.minecraft.entity.item.ItemEntity
 import net.minecraft.inventory.EquipmentSlotType
 import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
 import net.minecraft.nbt.IntNBT
+import net.minecraft.util.text.ITextComponent
 import net.minecraft.util.text.StringTextComponent
 import net.minecraftforge.event.entity.player.PlayerInteractEvent
 
@@ -16,7 +18,9 @@ class CoalTorchAttunement(var charges: Int): Attunement({ ModAttunements.coalTor
 
     override fun canBeApplied(stack: ItemStack) = true
 
-    override fun getDisplay(advanced: Boolean) = StringTextComponent("$charges")
+    override fun getDisplay(tooltip: MutableList<ITextComponent>, advanced: ITooltipFlag, expand: Boolean) {
+        tooltip.add(StringTextComponent("$charges"))
+    }
 
     override fun serializeNBT() = IntNBT(charges)
 

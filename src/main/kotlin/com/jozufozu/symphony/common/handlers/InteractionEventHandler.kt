@@ -3,12 +3,13 @@ package com.jozufozu.symphony.common.handlers
 import com.jozufozu.symphony.api.Attunement
 import com.jozufozu.symphony.api.SymphonyAPI
 import com.jozufozu.symphony.api.interactions.AttackInteraction
-import com.jozufozu.symphony.common.attunements.EnchantmentAttunementType
 import net.alexwells.kottle.KotlinEventBusSubscriber
+import net.minecraft.client.Minecraft
 import net.minecraft.entity.LivingEntity
 import net.minecraft.inventory.EquipmentSlotType
 import net.minecraft.item.ItemStack
 import net.minecraft.potion.EffectInstance
+import net.minecraft.util.text.ITextComponent
 import net.minecraftforge.event.entity.living.LivingDamageEvent
 import net.minecraftforge.event.entity.living.LivingDeathEvent
 import net.minecraftforge.event.entity.living.LivingDropsEvent
@@ -26,14 +27,15 @@ object InteractionEventHandler {
     @SubscribeEvent
     fun alterTooltip(event: ItemTooltipEvent) {
         val attunements = SymphonyAPI.getStackAttunements(event.itemStack)
+        if (attunements.isEmpty()) return
 
+        val toolTip = arrayListOf<ITextComponent>()
+        val expand = event.player != null && Minecraft.getInstance().gameSettings.keyBindSneak.isKeyDown
         for (attunement in attunements) {
-            if (attunement is EnchantmentAttunementType.EnchantmentAttunement) {
-                event.toolTip.remove(attunement.getEnchantment().getDisplayName(attunement.level))
-            }
+            attunement.getDisplay(toolTip, event.flags, expand)
         }
 
-        event.toolTip.addAll(1, attunements.map { it.getDisplay(false) })
+        event.toolTip.addAll(1, toolTip)
     }
 
     @SubscribeEvent

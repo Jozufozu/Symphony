@@ -1,6 +1,7 @@
 package com.jozufozu.symphony.api
 
 import com.jozufozu.symphony.api.interactions.AttackInteraction
+import net.minecraft.client.util.ITooltipFlag
 import net.minecraft.entity.LivingEntity
 import net.minecraft.inventory.EquipmentSlotType
 import net.minecraft.item.ItemStack
@@ -15,7 +16,7 @@ import net.minecraftforge.registries.ForgeRegistryEntry
 abstract class Attunement(val type: () -> AttunementType<*>): ForgeRegistryEntry<Attunement>() {
     var dirty: Boolean = false
 
-    abstract fun getDisplay(advanced: Boolean): ITextComponent
+    abstract fun getDisplay(tooltip: MutableList<ITextComponent>, advanced: ITooltipFlag, expand: Boolean)
 
     /**
      * Whether or not this type of note can be applied to the given item stack.
