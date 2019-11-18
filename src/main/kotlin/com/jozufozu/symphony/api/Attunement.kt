@@ -9,7 +9,7 @@ import net.minecraft.nbt.INBT
 import net.minecraft.util.text.ITextComponent
 import net.minecraftforge.event.entity.living.LivingDeathEvent
 import net.minecraftforge.event.entity.living.LivingDropsEvent
-import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract
+import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock
 import net.minecraftforge.registries.ForgeRegistryEntry
 
@@ -53,7 +53,7 @@ abstract class Attunement(val type: () -> AttunementType<*>): ForgeRegistryEntry
 
     open fun onBreakBlock(stack: ItemStack, equipmentType: EquipmentSlotType) {}
 
-    open fun onEntityInteract(stack: ItemStack, equipmentType: EquipmentSlotType, event: EntityInteract) {}
+    open fun onEntityInteract(stack: ItemStack, equipmentType: EquipmentSlotType, event: PlayerInteractEvent.EntityInteractSpecific) {}
 
     open fun onRightClickBlock(stack: ItemStack, equipmentType: EquipmentSlotType, event: RightClickBlock) {}
 }

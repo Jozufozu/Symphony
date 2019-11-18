@@ -22,7 +22,7 @@ object SymphonyAPI {
 
     lateinit var registry: IForgeRegistry<AttunementType<*>>
 
-    fun runOnAllAttunements(entity: LivingEntity, action: (ItemStack, EquipmentSlotType, Attunement) -> Unit) {
+    fun runOnAllEquipped(entity: LivingEntity, action: (ItemStack, EquipmentSlotType, Attunement) -> Unit) {
         for (equipmentSlotType in EquipmentSlotType.values()) {
             val stack = entity.getItemStackFromSlot(equipmentSlotType)
             for (attunement in getStackAttunements(stack)) {

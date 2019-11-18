@@ -39,8 +39,8 @@ object InteractionEventHandler {
     }
 
     @SubscribeEvent
-    fun onEntityInteract(event: PlayerInteractEvent.EntityInteract) {
-        SymphonyAPI.runOnAllAttunements(event.player) { stack: ItemStack, equipmentType: EquipmentSlotType, attunement: Attunement ->
+    fun onEntityInteract(event: PlayerInteractEvent.EntityInteractSpecific) {
+        SymphonyAPI.runOnAllEquipped(event.player) { stack: ItemStack, equipmentType: EquipmentSlotType, attunement: Attunement ->
             attunement.onEntityInteract(stack, equipmentType, event)
 
             if (attunement.dirty) {
@@ -51,7 +51,7 @@ object InteractionEventHandler {
 
     @SubscribeEvent
     fun onRightClickBlock(event: PlayerInteractEvent.RightClickBlock) {
-        SymphonyAPI.runOnAllAttunements(event.player) { stack: ItemStack, equipmentType: EquipmentSlotType, attunement: Attunement ->
+        SymphonyAPI.runOnAllEquipped(event.player) { stack: ItemStack, equipmentType: EquipmentSlotType, attunement: Attunement ->
             attunement.onRightClickBlock(stack, equipmentType, event)
 
             if (attunement.dirty) {
@@ -61,12 +61,22 @@ object InteractionEventHandler {
     }
 
     @SubscribeEvent
-    fun onUserDeath(event: LivingDeathEvent) {
-        SymphonyAPI.runOnAllAttunements(event.entityLiving) { stack: ItemStack, equipmentType: EquipmentSlotType, attunement: Attunement ->
+    fun onLivingDeath(event: LivingDeathEvent) {
+        SymphonyAPI.runOnAllEquipped(event.entityLiving) { stack: ItemStack, equipmentType: EquipmentSlotType, attunement: Attunement ->
             attunement.onUserDeath(stack, equipmentType, event)
 
             if (attunement.dirty) {
                 SymphonyAPI.updateAttunement(stack, attunement)
+            }
+        }
+
+        (event.source.trueSource as? LivingEntity)?.let {
+            SymphonyAPI.runOnAllEquipped(it) { stack: ItemStack, equipmentType: EquipmentSlotType, attunement: Attunement ->
+                attunement.onUserDeath(stack, equipmentType, event)
+
+                if (attunement.dirty) {
+                    SymphonyAPI.updateAttunement(stack, attunement)
+                }
             }
         }
     }
@@ -93,7 +103,7 @@ object InteractionEventHandler {
     @SubscribeEvent
     fun onLivingUpdate(event: LivingEvent.LivingUpdateEvent) {
         val user = event.entityLiving
-        SymphonyAPI.runOnAllAttunements(user) { stack: ItemStack, equipmentType: EquipmentSlotType, attunement: Attunement ->
+        SymphonyAPI.runOnAllEquipped(user) { stack: ItemStack, equipmentType: EquipmentSlotType, attunement: Attunement ->
             attunement.onUserUpdate(stack, equipmentType, user)
 
             if (attunement.dirty) {
@@ -116,7 +126,7 @@ object InteractionEventHandler {
         val interaction = AttackInteraction(attacked, damageSource, event.amount)
 
         if (attacker is LivingEntity) {
-            SymphonyAPI.runOnAllAttunements(attacker) { stack: ItemStack, equipmentType: EquipmentSlotType, attunement: Attunement ->
+            SymphonyAPI.runOnAllEquipped(attacker) { stack: ItemStack, equipmentType: EquipmentSlotType, attunement: Attunement ->
                 attunement.onUserAttackEntity(stack, equipmentType, interaction)
 
                 if (attunement.dirty) {
@@ -125,7 +135,7 @@ object InteractionEventHandler {
             }
         }
 
-        SymphonyAPI.runOnAllAttunements(attacked) { stack: ItemStack, equipmentType: EquipmentSlotType, attunement: Attunement ->
+        SymphonyAPI.runOnAllEquipped(attacked) { stack: ItemStack, equipmentType: EquipmentSlotType, attunement: Attunement ->
             attunement.onUserAttackedByEntity(stack, equipmentType, interaction)
         }
 
