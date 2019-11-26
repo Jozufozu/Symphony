@@ -72,7 +72,7 @@ object InteractionEventHandler {
 
         (event.source.trueSource as? LivingEntity)?.let {
             SymphonyAPI.runOnAllEquipped(it) { stack: ItemStack, equipmentType: EquipmentSlotType, attunement: Attunement ->
-                attunement.onUserDeath(stack, equipmentType, event)
+                attunement.onUserKill(stack, equipmentType, event)
 
                 if (attunement.dirty) {
                     SymphonyAPI.updateAttunement(stack, attunement)

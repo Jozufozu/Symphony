@@ -17,6 +17,7 @@ object ModAttunements {
     val buildUp = register("buildup", BasicAttunementType(IntNBT::class.java, ::BuildUpAttunement, ::BuildUpAttunement))
     val coalTorch = register("coal_torch", BasicAttunementType(IntNBT::class.java, ::LightCollectorAttunement, ::LightCollectorAttunement))
     val soulBound = register("soulbound", DatalessAttunementType(SoulBoundAttunement))
+    val statTrack = register("stat_track", DatalessAttunementType(SoulBoundAttunement))
 
     @SubscribeEvent
     fun registerAttunements(event: RegistryEvent.Register<AttunementType<*>>) {

@@ -44,6 +44,8 @@ abstract class Attunement(val type: () -> AttunementType<*>): ForgeRegistryEntry
 
     open fun onUserDeath(stack: ItemStack, equipmentType: EquipmentSlotType, event: LivingDeathEvent) {}
 
+    open fun onUserKill(stack: ItemStack, equipmentType: EquipmentSlotType, event: LivingDeathEvent) {}
+
     /**
      * Called when the user of this attunement dies and drops their items.
      *
